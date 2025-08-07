@@ -16,6 +16,21 @@
         margin: 0;
       }
     </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-QWP97RVXME"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-QWP97RVXME");
+    </script>
   </head>
 
   <body>
@@ -29,5 +44,61 @@
         box-sizing: border-box;
       "
     ></iframe>
+
+    <script>
+      function triggerWindow({ window_field_name = "", parameters = [] } = {}) {
+        try {
+          if (!window_field_name || !window_field_name.trim()) {
+            console.warn("Empty window_field_name provided");
+            return;
+          }
+          if (!Array.isArray(parameters)) {
+            console.warn("Parameters should be an array");
+            return;
+          }
+          // Split the window_field_name into parts for nested access
+          const field_parts = window_field_name.split(".");
+          let targetFunction = window;
+
+          // Traverse the object path
+          for (const part of field_parts) {
+            targetFunction = targetFunction[part];
+            if (!targetFunction) {
+              console.warn(
+                `Property ${window_field_name} not found on window object`
+              );
+              return;
+            }
+          }
+
+          // Check if the final target is a function
+          if (typeof targetFunction === "function") {
+            targetFunction(...parameters);
+          } else {
+            console.warn(`Property ${window_field_name} is not a function`);
+          }
+        } catch (e) {
+          console.error(`Error triggering window function: ${e.message}`);
+        }
+      }
+
+      window.addEventListener(
+        "message",
+        (event) => {
+          if (event.origin !== "https://lindelli-events-fix.netlify.app")
+            return;
+
+          const { data = {} } = event;
+          const { code = "" } = data;
+          if (event.data?.code === "MESSAGE_TRIGGER_WINDOW") {
+            triggerWindow({
+              window_field_name: data.window_field_name || "",
+              parameters: data.parameters || [],
+            });
+          }
+        },
+        false
+      );
+    </script>
   </body>
 </html>
